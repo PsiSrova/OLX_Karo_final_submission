@@ -39,7 +39,7 @@
     <link href="../static/css/style.css" rel="stylesheet">
 
   </head>
-  <body style="background-color: #d0d9df;">
+  <body style="background-color: #acc4ae;">
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
@@ -62,23 +62,23 @@
 
 
   <!-- ======= Header ======= -->
-  <header id="header" class="fixed-top" style="background-color: rgba(0, 0, 0, 0.8);">
+  <header id="header" class="fixed-top " style="background-color: rgba(0, 0, 0, 0.8);">
     <div class="container d-flex align-items-center justify-content-lg-between">
 
-      <a href="index.html" class="logo me-auto me-lg-0"><img src="../static/img/logo.png" alt="" class="img-fluid"></a>
+      <a href="{{url_for('welcome_user')}}" class="logo me-auto me-lg-0"><img src="../static/img/logo.png" alt="" class="img-fluid"></a>
 
       <nav id="navbar" class="navbar order-last order-lg-0">
         <ul>
-          <li><a class="nav-link scrollto active" href="index.html">Home</a></li>
-          <li><a class="nav-link scrollto" href="index.html#about">About</a></li>
-          <li><a class="nav-link scrollto" href="product_upload.html">Sell</a></li>
-          <li><a class="nav-link scrollto" href="index.html#contact">Contact Us</a></li>
+          <li><a class="nav-link scrollto active" href="{{ url_for('welcome_user') }}">Home</a></li>
+          <li><a class="nav-link scrollto" href="{{ url_for('go_to_about') }}">About</a></li>
+          <li><a class="nav-link scrollto" href="{{ url_for('add_product') }}">Sell</a></li>
+          <li><a class="nav-link scrollto" href="{{ url_for('go_to_contact') }}">Contact Us</a></li>
           <li class="dropdown"><a href="#"><span>Categories</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              <li><a href="#">Drop Down 1</a></li>
+              <li><a href="{{ url_for('show_products', category='mobile') }}">Mobile</a></li>
               <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-right"></i></a>
                 <ul>
-                  <li><a href="#">Deep Drop Down 1</a></li>
+                  <li><a href="product_catalogue.html">Deep Drop Down 1</a></li>
                   <li><a href="#">Deep Drop Down 2</a></li>
                   <li><a href="#">Deep Drop Down 3</a></li>
                   <li><a href="#">Deep Drop Down 4</a></li>
@@ -90,18 +90,26 @@
               <li><a href="#">Drop Down 4</a></li>
             </ul>
           </li>
-          <li><a class="nav-link scrollto" href="#contact">Search</a></li>
+          <!-- <li><a class="nav-link scrollto" href="#contact">Search</a></li> -->
+          <li>
+            <div class="input-group mx-3">
+              <form method="POST" action="{{url_for('search_results')}}">
+              <input type="search" class="form-control" placeholder="Search" aria-label="Recipient's username" aria-describedby="button-addon2" style="font-size: 0.7rem;" name="search_query">
+              <button class="btn btn-outline-secondary" type="submit" id="button-addon2" style="background-color: #ffc451;"><i class="bi bi-search"></i></button>
+              </form>
+            </div>
+          </li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->
 
-      <a href="login.html" class="get-started-btn scrollto">Get Started</a>
+      <a href="{{ url_for('show_profile') }}" class="get-started-btn scrollto d-flex align-items-center"><i class="bi bi-person-circle bi-lg me-2" style="font-size: 1rem !important;"></i><span style="font-weight: 600; font-size: 1rem;"> Welcome User</span></a>
 
     </div>
   </header><!-- End Header -->
 
 
-  <div class="container-fluid">
+  <!-- <div class="container-fluid">
     <div class="row" style="margin-top: 100px;">
         <div class="col-8 align-items-start">
             <div class="row ml-2">
@@ -160,6 +168,58 @@
                 <h2>Loid Forger</h2>
                 <p style="font-size: 12px;">21-Bakers Street, Westalis, Chicago, USA - 1909202</p>
                 <span><a href="#about" class="get-started-btn scrollto"><span style="color: black; font-family: sans-serif ;font-weight: 500;">Chat With Seller</span></a></span>
+            </div>
+        </div>
+    </div>
+  </div> -->
+
+  <div class="container-fluid">
+    <div class="row" style="margin-top: 100px;">
+        <div class="col-8 align-items-start">
+            <div class="row ml-2">
+                <div id="carouselExampleIndicators" class="carousel slide">
+                    <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                    </div>
+                    <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="/../static/img/testimonials-bg.jpg" class="d-block w-100" alt="...">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="/../static/img/testimonials-bg.jpg" class="d-block w-100" alt="...">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="/../static/img/cta-bg.jpg" class="d-block w-100" alt="...">
+                    </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                    </button>
+              </div>
+            </div>
+            <div class="row my-4 mx-1 p-3" style="background-color: #bac5cb; border-radius: 10px;">
+                <h2>Product Description</h2>
+                <hr>
+                <h4 style="color: rgb(27, 27, 27);">Product name: {{data['name']}}</h4>
+                <p style="font-size: 14px;">{{data['description']}}</p>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="row my-4 mx-1 p-3" style="background-color: #bac5cb; border-radius: 10px;">
+                <h2 style="font-family: sans-serif; color: black;">Price: ₹{{data['price']}}</h2>
+
+            </div>
+            <div class="row my-4 mx-1 p-3" style="background-color: #bac5cb; border-radius: 10px;">
+                <h2>Seller: {{ data['username']}}</h2>
+                <p style="font-size: 12px;"></p>
+                <span><a href="{{url_for('add_chat_contact', seller_id = data['username'])}}" class="get-started-btn scrollto"><span style="color: black; font-family: sans-serif ;font-weight: 500;">Chat With Seller</span></a></span>
             </div>
         </div>
     </div>

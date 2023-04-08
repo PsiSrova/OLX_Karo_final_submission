@@ -182,7 +182,7 @@
               <h2>Create an account</h2>
             </div>
           </div>
-          <form method="post" action="{{ url_for('register_user') }}">
+          <form method="post" action="{{ url_for('register_user') }}" enctype="multipart/form-data">
           <div class="row mt-2 mb-3 text-center d-flex justify-content-center">
             <div class="col-3">
                 <div class="form-floating">
@@ -241,6 +241,27 @@
                   />
                   <label for="floatingPassword">Password</label>
                 </div>
+                <div class="form-floating mt-3">
+                  <input
+                      type="text"
+                      class="form-control"
+                      id="floatingInput"
+                      placeholder="john_doe23"
+                      name="address"
+                    />
+                    <label for="floatingInput">Address</label>
+                </div>
+                  <input
+                      type="file"
+                      class="form-control"
+                      id="floatingInput"
+                      placeholder="john_doe23"
+                      accept="image/png, image/jpeg, image/jpg"
+                      name="img"
+                      style="margin-top: 10px;"
+                    />
+                    <label for="floatingInput">UPLOAD PROFILE IMAGE</label>
+                
             </div>
           </div>
           <div class="row justify-content-center">

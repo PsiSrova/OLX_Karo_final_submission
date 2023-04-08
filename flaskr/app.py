@@ -1,12 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from io import BytesIO
 from flask_session import Session
 from jinja2 import Template
-# from flask_socketio import SocketIO
-# from flask_socketio import emit, send
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
 import datetime
+import base64
+
 app = Flask(__name__)
 app.secret_key = 'shankh'
 
@@ -17,12 +18,21 @@ Session(app)
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'shankh'
+app.config['MYSQL_PASSWORD'] = 'Debu'
 app.config['MYSQL_DB'] = 'user'
 mysql = MySQL(app)
 
 
-def insert_profile(first_name,last_name,username,email,password):
+class Product():
+    def __init__(self, name, category, price, image, description):
+        self.name = name
+        self.category = category
+        self.price = price
+        self.image = image
+        self.description = description
+
+
+def insert_profile(first_name,last_name,username,email,password, address, image_data):
    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
    check=cursor.execute('SELECT * FROM profile WHERE username = (% s) ', (username,))
    report=tuple(cursor.fetchall())
@@ -33,10 +43,12 @@ def insert_profile(first_name,last_name,username,email,password):
    elif (report_mail != ()): return 2
    else:  
         cursor.execute('create table chat.{} (user_id VARCHAR(100), sender_id VARCHAR(100), message VARCHAR(1000), date DATE, time TIME)'.format(username))
-        cursor.execute('INSERT INTO profile VALUES (% s,% s,% s ,% s,% s);', (first_name,last_name,username, email, password))
+        cursor.execute('create table wishlist.{} (s_no int);'.format(username))
+        cursor.execute('INSERT INTO profile VALUES (% s,% s,% s ,% s,% s, % s, % s);', (first_name,last_name,username, email, password, address, image_data))
         mysql.connection.commit()
    cursor.close()
    return(1)
+
 def insert_chat(user_id_1, user_id_2,sender_id, message, date, time):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute('USE chat;')
@@ -47,9 +59,38 @@ def insert_chat(user_id_1, user_id_2,sender_id, message, date, time):
     cursor.execute('use user;')
     cursor.close()
     
+def product(slug):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('select * from products where slug=(%s)',(slug,))
+    rep=tuple(cursor.fetchone())
+    return rep
+
+def insert_wishlist(product_id,username):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('use wishlist')
+    cursor.execute('insert into {} values (%s);'.format(username),(product_id,))
+    mysql.connection.commit()
+    rep=tuple(cursor.fetchall())
+    cursor.close()
+    return rep
+
+
 @app.route('/')
 def hello():
-    return render_template('index.html')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('use user;')
+    cursor.execute('SELECT COUNT(*) FROM profile;')
+    user_count = cursor.fetchall()
+    user_count = user_count[0]['COUNT(*)']
+    cursor.execute('use product;')
+    cursor.execute('SELECT COUNT(*) FROM products;')
+    prod_count = cursor.fetchall()
+    prod_count = prod_count[0]['COUNT(*)']
+    cursor.execute('select distinct category from products;')
+    category_count = len(cursor.fetchall())
+
+
+    return render_template('index.html',user_count=user_count,prod_count=prod_count,category_count=category_count)
 
 @app.route('/login.html/register', methods = ['GET', 'POST'])
 def register_user():
@@ -59,7 +100,14 @@ def register_user():
         user_mail = request.form.get("email")
         password = request.form.get("pwd")
         username = request.form.get("Username")
-        check = insert_profile(first_name, last_name, username, user_mail, password)
+        address = request.form.get("address")
+        image = request.files["img"]
+        img_path = '{}'.format(username)
+        image.save(img_path)
+        with open(img_path, 'rb') as f:
+            image_data = f.read()
+
+        check = insert_profile(first_name, last_name, username, user_mail, password, address, image_data)
         if check == 0 : 
             return "<script> alert('Username already exists!') </script>"
         elif check == 2 : 
@@ -88,10 +136,43 @@ def user_login():
             return redirect(url_for('welcome_user'))
     return render_template("login.html")
 
+
+@app.route('/logout')
+def logout():
+    session['username'] = None
+    return redirect('/')
+
+
 @app.route('/landing_page.html', methods = ['GET', 'POST'])
 def welcome_user():
-    print(session.get('username'), 11111111111111111111111111111111111111111111111111111)
-    return render_template("landing_page.html")
+    if not session.get('username'):
+        return redirect(url_for('user_login'))
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('use user;')
+    cursor.execute('SELECT COUNT(*) FROM profile;')
+    user_count = cursor.fetchall()
+    user_count = user_count[0]['COUNT(*)']
+
+    cursor.execute('use product;')
+    cursor.execute('SELECT COUNT(*) FROM products;')
+    prod_count = cursor.fetchall()
+    prod_count = prod_count[0]['COUNT(*)']
+    cursor.execute('select distinct category from products;')
+    category_count = len(cursor.fetchall())
+
+    return render_template("landing_page.html", user_count = user_count, prod_count =prod_count,category_count=category_count)
+
+@app.route('/landing_page.html', methods = ['GET', 'POST'])
+def go_to_about():
+    if not session.get('username'):
+        return redirect(url_for('user_login'))
+    return render_template("landing_page.html#about")
+
+@app.route('/landing_page.html', methods = ['GET', 'POST'])
+def go_to_contact():
+    if not session.get('username'):
+        return redirect(url_for('user_login'))
+    return render_template("landing_page.html#contact")
 
 @app.route('/chatbox.html')
 def sessions():
@@ -133,7 +214,11 @@ def handle_message():
         now=datetime.datetime.now()
         date,time=now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S")
         insert_chat(user_id,user_id2,user_id, message,date,time)
-        return render_template("chat.html")
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("USE chat;")
+        cursor.execute('select * from {} where user_id="{}";'.format(user_id,user_id2))
+        report=tuple(cursor.fetchall())
+        return render_template("chat.html", report=report, user_id2=user_id2, user_id=user_id)
     else: return render_template("chat.html")
 
 
@@ -146,5 +231,214 @@ def select_chat():
     report=cursor.fetchall()
     return render_template("chat_app.html",report = report)
 
+
+@app.route('/profile')
+def show_profile():
+    user_id = session.get('username')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('USE user;')
+    cursor.execute('select * from profile where username = "{}"'.format(user_id))
+    data = cursor.fetchall()
+    cursor.execute('select user_img from profile where username = "{}"'.format(user_id))
+    result = cursor.fetchone()
+
+    products=[]
+    cursor.execute('USE product;')
+    cursor.execute('select * from products WHERE username="{}"'.format(user_id))
+    results=cursor.fetchall()
+    for row in results:
+        product = {
+            'name': row['name'],
+            'description': row['description'],
+            'category': row['category'],
+            'price': row['price'],
+            'image': base64.b64encode(row['image']).decode('utf-8'),
+            'id': row['s_no']
+        }
+        products.append(product)
+    if result['user_img'] != None:
+        img_data = result['user_img']
+        img_data_b64 = base64.b64encode(img_data).decode('utf-8')
+    else:
+        img_data_b64 = None
+    cursor.execute('select * from product.products')
+    results=tuple(cursor.fetchall())
+    all_products=[]
+    for row in results:
+        product = {
+            'name': row['name'],
+            'description': row['description'],
+            'category': row['category'],
+            'price': row['price'],
+            'image': base64.b64encode(row['image']).decode('utf-8'),
+            'id': row['s_no']
+        }
+        all_products.append(product)
+    cursor.execute('select * from wishlist.{} '.format(user_id))
+    wishlist = tuple(cursor.fetchall())
+
+    return render_template("profile.html", img_data_b64=img_data_b64, data=data, products=products,wishlist=wishlist,all_products=all_products)
+
+
+@app.route('/profile/edit', methods=['GET', 'POST'])
+def edit_profile():
+    user_id = session.get('username')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('USE user;')
+    cursor.execute('select * from profile where username = "{}"'.format(user_id))
+    data = cursor.fetchall()
+    cursor.execute('select user_img from profile where username = "{}"'.format(user_id))
+    result = cursor.fetchone()
+    if result['user_img'] != None:
+        img_data = result['user_img']
+        img_data_b64 = base64.b64encode(img_data).decode('utf-8')
+    else:
+        img_data_b64 = None
+    if request.method == "POST":
+        firstname = request.form.get("first")
+        lastname = request.form.get("last")
+        email = request.form.get("email")
+        address = request.form.get("address")
+        cursor.execute("UPDATE profile SET firstname=% s, lastname = % s, email = % s ,address = % s where username = '{}';".format(user_id), (firstname, lastname, email, address))
+        mysql.connection.commit()
+        return redirect(url_for('show_profile'))
+    return render_template("profile_edit.html", data=data, img_data_b64=img_data_b64)
+
+
+@app.route('/products')
+def show_products():
+    user_id=session['username']
+    print(user_id,"huuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+    category = request.args.get('category')
+    user_id=session['username']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('USE product;')
+    if category=="all_categories":
+        cursor.execute('select * from products'.format(category))
+    else:
+        cursor.execute('select * from products where category = "{}"'.format(category))
+    results = cursor.fetchall()
+    data=[]
+    for row in results:
+        product = {
+            'name': row['name'],
+            'description': row['description'],
+            'category': row['category'],
+            'price': row['price'],
+            'image': base64.b64encode(row['image']).decode('utf-8'),
+            'id': row['s_no']
+        }
+        data.append(product)
+
+    cursor.execute('select * from wishlist.{} '.format(user_id))
+    wishlist = tuple(cursor.fetchall())
+    return render_template("product_catalogue.html", data = data,wishlist=wishlist,user_id=user_id)
+
+@app.route('/products/wishlist_add', methods=['GET'])
+def add_wishlist():
+    if not session.get('username'):
+        return redirect(url_for('hello'))
+    product_id = request.args.get('product_id')
+    user_id=session['username']
+    print(product_id,user_id)
+    insert_wishlist(product_id,user_id)
+    return "<h1>product uploaded successfully</h1>"
+
+@app.route('/products/wishlist_remove', methods=['GET','POST'])
+def remove_wishlist():
+    if not session.get('username'):
+        return redirect(url_for('hello'))
+    product_id = request.args.get('product_id')
+    user_id=session['username']
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("USE wishlist")
+    cursor.execute("delete  from {} where s_no=(%s);".format(user_id),(product_id))
+    mysql.connection.commit()
+    return "<h1>wishlist uploaded successfully</h1>"
+
+@app.route('/add_product', methods=['GET', 'POST'])
+def add_product():
+    if not session.get('username'):
+        return redirect(url_for('hello'))
+    message = ""
+    userid = session.get('username')
+    if request.method == 'POST':
+        name = request.form['name']
+        category = request.form['category']
+        price = request.form['price']
+        image = request.files['image'].read()
+        description = request.form['description']
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO product.products (name, username, category, price, image, description) VALUES (%s,% s, %s, %s, %s, %s)", (name, userid ,category, price, image, description))
+        mysql.connection.commit()
+        return "<h1>product uploaded successfully</h1>"
+    return render_template("product_upload.html")
+
+@app.route('/product_details', methods=['GET', 'POST'])
+def prod_details():
+    prodID = request.args.get('prodID')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('USE product;')
+    cursor.execute('select * from products where s_no = "{}"'.format(prodID))
+    data = cursor.fetchall()
+    print(data)
+    # print(data[0]['name'],"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    return render_template("product_description.html", data=data[0])
+
+@app.route('/add_contact')
+def add_chat_contact():
+    seller_id = request.args.get('seller_id')
+    user_id = session.get('username')
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    now=datetime.datetime.now()
+    date,time=now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S")
+    cursor.execute('USE chat;')
+    cursor.execute("INSERT INTO {} VALUES (%s,% s, %s, %s, %s)".format(user_id), (seller_id, user_id ,"Chat Connected",date ,time ))
+    cursor.execute("INSERT INTO {} VALUES (%s,% s, %s, %s, %s)".format(seller_id), (user_id, user_id ,"Chat Connected",date ,time ))
+    mysql.connection.commit()
+    return redirect(url_for('select_chat'))
+
+
+
+@app.route('/search_results', methods=['GET', 'POST'])
+def search_results():
+    if request.method == 'POST':
+        user_id=session['username']
+        search_query = request.form.get('search_query')
+        print(search_query) 
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("USE product")
+        cursor.execute("SELECT * FROM products WHERE name LIKE %s", ('%' + search_query + '%',))
+        results=cursor.fetchall()
+        data=[]
+        for row in results:
+            product = {
+                'name': row['name'],
+                'description': row['description'],
+                'category': row['category'],
+                'price': row['price'],
+                'image': base64.b64encode(row['image']).decode('utf-8'),
+                'id': row['s_no']
+            }
+            data.append(product)
+        cursor.execute('select * from wishlist.{} '.format(user_id))
+        wishlist = tuple(cursor.fetchall())
+        return render_template("product_catalogue.html", data = data,wishlist=wishlist,user_id=user_id)
+    else:
+        return redirect(url_for('show_products'))
+    
+@app.route('/profile/remove_prod')
+def remove_product():
+    prodID = request.args.get('prodID')
+    print(prodID,"KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK")
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("USE product")
+    cursor.execute("delete from products where s_no={}".format(prodID))
+    mysql.connection.commit()
+    return redirect(url_for('show_profile'))
+
+
+
+    
 if __name__ == "__main__":
-    app.run(debug = True)
+    app.run(debug = True, port="8000")

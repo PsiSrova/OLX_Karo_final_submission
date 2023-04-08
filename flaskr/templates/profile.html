@@ -44,23 +44,23 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"></script>
 
   <!-- ======= Header ======= -->
-  <header id="header" class="fixed-top" style="background-color: rgba(0, 0, 0, 0.8);">
+  <header id="header" class="fixed-top " style="background-color: rgba(0, 0, 0, 0.8);">
     <div class="container d-flex align-items-center justify-content-lg-between">
 
-      <a href="index.html" class="logo me-auto me-lg-0"><img src="../static/img/logo.png" alt="" class="img-fluid"></a>
+      <a href="{{url_for('welcome_user')}}" class="logo me-auto me-lg-0"><img src="../static/img/logo.png" alt="" class="img-fluid"></a>
 
       <nav id="navbar" class="navbar order-last order-lg-0">
         <ul>
-          <li><a class="nav-link scrollto active" href="index.html">Home</a></li>
-          <li><a class="nav-link scrollto" href="index.html#about">About</a></li>
-          <li><a class="nav-link scrollto" href="product_upload.html">Sell</a></li>
-          <li><a class="nav-link scrollto" href="index.html#contact">Contact Us</a></li>
+          <li><a class="nav-link scrollto active" href="{{ url_for('welcome_user') }}">Home</a></li>
+          <li><a class="nav-link scrollto" href="{{ url_for('go_to_about') }}">About</a></li>
+          <li><a class="nav-link scrollto" href="{{ url_for('add_product') }}">Sell</a></li>
+          <li><a class="nav-link scrollto" href="{{ url_for('go_to_contact') }}">Contact Us</a></li>
           <li class="dropdown"><a href="#"><span>Categories</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              <li><a href="#">Drop Down 1</a></li>
+              <li><a href="{{ url_for('show_products', category='mobile') }}">Mobile</a></li>
               <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-right"></i></a>
                 <ul>
-                  <li><a href="#">Deep Drop Down 1</a></li>
+                  <li><a href="product_catalogue.html">Deep Drop Down 1</a></li>
                   <li><a href="#">Deep Drop Down 2</a></li>
                   <li><a href="#">Deep Drop Down 3</a></li>
                   <li><a href="#">Deep Drop Down 4</a></li>
@@ -72,15 +72,17 @@
               <li><a href="#">Drop Down 4</a></li>
             </ul>
           </li>
-          <li><a class="nav-link scrollto" href="#contact">Search</a></li>
+          <!-- <li><a class="nav-link scrollto" href="#contact">Search</a></li> -->
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->
 
-      <a href="login.html" class="get-started-btn scrollto">Get Started</a>
+      <a href="{{ url_for('show_profile') }}" class="get-started-btn scrollto d-flex align-items-center"><i class="bi bi-person-circle bi-lg me-2" style="font-size: 1rem !important;"></i><span style="font-weight: 600; font-size: 1rem;"> Welcome User</span></a>
 
     </div>
   </header><!-- End Header -->
+
+
   <div class="container-fluid" style="margin-top: 100px;">
     <p style="text-align: center; font-size:300%;  color: #00585A;">User Profile</p>
   </div>
@@ -96,13 +98,16 @@
                 <div class="card">
                   <div class="card-body">
                     <div class="d-flex flex-column align-items-center text-center">
-                      <img src="../static/img/kakashi.png" class="rounded-circle p-1 bg-primary" width="280">
-                      <div class="mt-3">
-                      </div>
+                      {% if img_data_b64 %}
+                        <img src="data:image/jpeg;base64, {{ img_data_b64 }}" class="rounded-circle p-1 bg-primary" width="280">
+                      {% else %}
+                        <img src="" class="rounded-circle p-1 bg-primary" width="280">
+                      {% endif %}
+                      <div class="mt-3"></div>
                     </div>
                     <a href="\chat_app.html">
                       <p style="text-align: center;">
-                        <input type="button" class="btn btn-primary px-4" value="Chats">
+                        <a href="{{ url_for('select_chat') }}"><input type="button" class="btn btn-primary px-4" value="Chats"></a>
                       </p>
                     </a>
                     </li>
@@ -115,10 +120,10 @@
                   <div class="card-body">
                     <div class="row mb-3">
                       <div class="col-sm-3">
-                        <h6 class="mb-0">User ID:</h6>
+                        <h6 class="mb-0">Username:</h6>
                       </div>
                       <div class="col-sm-9 text-secondary">
-                        <input type="text" class="form-control" value="Kakashi03" readonly>
+                        <input type="text" class="form-control" value="{{ data[0]['username'] }}" readonly >
                       </div>
                     </div>
                     <div class="row mb-3">
@@ -126,7 +131,7 @@
                         <h6 class="mb-0">First Name:</h6>
                       </div>
                       <div class="col-sm-9 text-secondary">
-                        <input type="text" class="form-control" value="Kakashi" readonly>
+                        <input type="text" class="form-control" value="{{ data[0]['firstname'] }}"  readonly>
                       </div>
                     </div>
                     <div class="row mb-3">
@@ -134,7 +139,7 @@
                         <h6 class="mb-0">last Name:</h6>
                       </div>
                       <div class="col-sm-9 text-secondary">
-                        <input type="text" class="form-control" value="Hatake" readonly>
+                        <input type="text" class="form-control" value="{{ data[0]['lastname'] }}"  readonly>
                       </div>
                     </div>
                     <div class="row mb-3">
@@ -142,7 +147,7 @@
                         <h6 class="mb-0">Email:</h6>
                       </div>
                       <div class="col-sm-9 text-secondary">
-                        <input type="text" class="form-control" value="Kakashi@leaf.com" readonly>
+                        <input type="text" class="form-control" value="{{ data[0]['email'] }}"  readonly>
                       </div>
                     </div>
                     <div class="row mb-3">
@@ -160,38 +165,18 @@
                         <h6 class="mb-0">Street address:</h6>
                       </div>
                       <div class="col-sm-9 text-secondary">
-                        <input type="text" class="form-control" value="Hokage office street" readonly>
+                        <input type="text" class="form-control" value="{{ data[0]['address'] }}" readonly>
                       </div>
                     </div>
-                    <div class="row mb-3">
-                      <div class="col-sm-3">
-                        <h6 class="mb-0">City:</h6>
-                      </div>
-                      <div class="col-sm-9 text-secondary">
-                        <input type="text" class="form-control" value="Leaf village" readonly>
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <div class="col-sm-3">
-                        <h6 class="mb-0">State:</h6>
-                      </div>
-                      <div class="col-sm-9 text-secondary">
-                        <input type="text" class="form-control" value="Japan" readonly>
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <div class="col-sm-3">
-                        <h6 class="mb-0">zip code:</h6>
-                      </div>
-                      <div class="col-sm-9 text-secondary">
-                        <input type="text" class="form-control" value="152101" readonly>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-sm-3"></div>
-                      <div class="col-sm-9 text-secondary">
-                        <a href="profile_edit.html">
+                    <div class="row justify-content-center">
+                      <div class="col-sm-6 text-secondary">
+                        <a href="{{ url_for('edit_profile') }}">
                           <input type="button" class="btn btn-primary px-4" value="Edit profile">
+                        </a>
+                      </div>
+                      <div class="col-sm-6 text-secondary">
+                        <a href="{{ url_for('logout') }}">
+                          <input type="button" class="btn btn-primary px-4" value="Logout">
                         </a>
                       </div>
                     </div>
@@ -223,42 +208,24 @@
       <h3>Products Uploaded</h3>
     </div>
     <div class="row">
+      {% for product in products %}
       <div class="col-lg-3 col-md-6 mb-4">
         <div class="card">
-          <a href="your_link_here">
-            <img src="../static/img/features.jpg" class="card-img-top" alt="..."></a>
+          <a href="{{url_for('prod_details', prodID=product.id)}}">
+            <img src="data:image/png;base64,{{ product.image }}" class="card-img-top" alt="{{ product.name }}"></a>
           <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
-              content. This content is a little bit longer.</p>
-            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text">{{ product.description }}</p>
+            <p class="card-text"><small class="text-muted">{{ product.category }}</small></p>
+            <a href="{{url_for('remove_product', prodID=product.id)}}"><button  type="button" class="btn btn-primary px-4">Remove</button></a>
           </div>
         </div>
       </div>
-      <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card">
-          <a href="your_link_here">
-            <img src="../static/img/features.jpg" class="card-img-top" alt="..."></a>
-          <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
-              content. This content is a little bit longer.</p>
-            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card">
-          <a href="your_link_here">
-            <img src="../static/img/features.jpg" class="card-img-top" alt="..."></a>
-          <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
-              content. This content is a little bit longer.</p>
-            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-          </div>
-        </div>
-      </div>
+      {% if loop.index % 3 == 0 %}
+    </div>
+    <div class="row">
+      {% endif %}
+      {% endfor %}
     </div>
   </div>
 
@@ -267,42 +234,23 @@
       <h3>Wishlist</h3>
     </div>
     <div class="row">
-      <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card">
-          <a href="your_link_here">
-            <img src="../static/img/features.jpg" class="card-img-top" alt="..."></a>
-          <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
-              content. This content is a little bit longer.</p>
-            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+    {% for wish in wishlist %}
+      {% for product in all_products %}
+        {% if wish['s_no']==product['id'] %}
+          <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card">
+              <a href="your_link_here">
+                <img src="data:image/png;base64,{{ product.image }}" class="card-img-top" alt="{{ product.name }}"></a>
+              <div class="card-body">
+                <h5 class="card-title">{{product['name']}}</h5>
+                <p class="card-text">{{product['description']}}</p>
+                <a href="{{url_for('remove_wishlist',product_id=product['id'])}}">  <button type="submit" class="btn btn-primary px-4">Remove</button></a> 
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card">
-          <a href="your_link_here">
-            <img src="../static/img/features.jpg" class="card-img-top" alt="..."></a>
-          <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
-              content. This content is a little bit longer.</p>
-            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card">
-          <a href="your_link_here">
-            <img src="../static/img/features.jpg" class="card-img-top" alt="..."></a>
-          <div class="card-body">
-            <h5 class="card-title">Card title</h5>
-            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
-              content. This content is a little bit longer.</p>
-            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-          </div>
-        </div>
-      </div>
+        {%endif  %}
+      {%endfor%}
+    {%endfor%}
     </div>
   </div>
 

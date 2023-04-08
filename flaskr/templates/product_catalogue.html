@@ -65,20 +65,20 @@
   <header id="header" class="fixed-top" style="background-color: rgba(0, 0, 0, 0.8);">
     <div class="container d-flex align-items-center justify-content-lg-between">
 
-      <a href="index.html" class="logo me-auto me-lg-0"><img src="../static/img/logo.png" alt="" class="img-fluid"></a>
+      <a href="{{url_for('welcome_user')}}" class="logo me-auto me-lg-0"><img src="../static/img/logo.png" alt="" class="img-fluid"></a>
 
       <nav id="navbar" class="navbar order-last order-lg-0">
         <ul>
-          <li><a class="nav-link scrollto active" href="index.html">Home</a></li>
-          <li><a class="nav-link scrollto" href="index.html#about">About</a></li>
-          <li><a class="nav-link scrollto" href="product_upload.html">Sell</a></li>
-          <li><a class="nav-link scrollto" href="index.html#contact">Contact Us</a></li>
+          <li><a class="nav-link scrollto active" href="{{ url_for('welcome_user') }}">Home</a></li>
+          <li><a class="nav-link scrollto" href="#about">About</a></li>
+          <li><a class="nav-link scrollto" href="{{ url_for('add_product') }}">Sell</a></li>
+          <li><a class="nav-link scrollto" href="#contact">Contact Us</a></li>
           <li class="dropdown"><a href="#"><span>Categories</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              <li><a href="#">Drop Down 1</a></li>
+              <li><a href="{{ url_for('show_products', category='mobile') }}">Mobile</a></li>
               <li class="dropdown"><a href="#"><span>Deep Drop Down</span> <i class="bi bi-chevron-right"></i></a>
                 <ul>
-                  <li><a href="#">Deep Drop Down 1</a></li>
+                  <li><a href="product_catalogue.html">Deep Drop Down 1</a></li>
                   <li><a href="#">Deep Drop Down 2</a></li>
                   <li><a href="#">Deep Drop Down 3</a></li>
                   <li><a href="#">Deep Drop Down 4</a></li>
@@ -90,12 +90,19 @@
               <li><a href="#">Drop Down 4</a></li>
             </ul>
           </li>
-          <li><a class="nav-link scrollto" href="#contact">Search</a></li>
+          <!-- <li><a class="nav-link scrollto" href="#contact">Search</a></li> -->
+        <li>
+          <div class="input-group mx-3">
+            <form method="POST" action="{{url_for('search_results')}}">
+            <input type="search" class="form-control" placeholder="Search" aria-label="Recipient's username" aria-describedby="button-addon2" style="font-size: 0.7rem;" name="search_query">
+            <button class="btn btn-outline-secondary" type="submit" id="button-addon2" style="background-color: #ffc451;"><i class="bi bi-search"></i></button>
+            </form>
+          </div>
+        </li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->
-
-      <a href="login.html" class="get-started-btn scrollto" id="prelogin">Get Started</a>
+      <a href="{{ url_for('show_profile') }}" class="get-started-btn scrollto d-flex align-items-center"><i class="bi bi-person-circle bi-lg me-2" style="font-size: 1rem !important;"></i><span style="font-weight: 600; font-size: 1rem;"> Welcome User</span></a>
 
     </div>
   </header><!-- End Header -->
@@ -109,7 +116,7 @@
       </div>
     </div>
 
-    <section>
+    <!-- <section>
   <div class="container" style="margin-top: -30px;">
     <div class="row justify-content-center mb-3">
       <div class="col-md-12 col-xl-10">
@@ -130,13 +137,13 @@
               <div class="col-md-6 col-lg-6 col-xl-6">
                 <h5>Quant trident shirts</h5>
                <div class="d-flex flex-row">
-                  <!-- <div class="text-danger mb-1 me-2">
+                   <div class="text-danger mb-1 me-2">
                     <i class="fa fa-star"></i>
                     <i class="fa fa-star"></i>
                     <i class="fa fa-star"></i>
                     <i class="fa fa-star"></i>
                   </div>
-                  <span>310</span>  -->
+                  <span>310</span> 
                 </div>
                 <div class="mt-1 mb-0 text-muted small">
                   <span>100% cotton</span>
@@ -195,12 +202,12 @@
               <div class="col-md-6 col-lg-6 col-xl-6">
                 <h5>Quant olap shirts</h5>
                 <div class="d-flex flex-row">
-                  <!-- <div class="text-danger mb-1 me-2">
+                 <div class="text-danger mb-1 me-2">
                     <i class="fa fa-star"></i>
                     <i class="fa fa-star"></i>
                     <i class="fa fa-star"></i>
                     <i class="fa fa-star"></i>
-                  </div> -->
+                  </div> 
                 </div>
                 <div class="mt-1 mb-0 text-muted small">
                   <span>100% cotton</span>
@@ -259,12 +266,12 @@
               <div class="col-md-6 col-lg-6 col-xl-6">
                 <h5>Quant ruybi shirts</h5>
                 <div class="d-flex flex-row">
-                  <!-- <div class="text-danger mb-1 me-2">
+                   <div class="text-danger mb-1 me-2">
                     <i class="fa fa-star"></i>
                     <i class="fa fa-star"></i>
                     <i class="fa fa-star"></i>
                     <i class="fa fa-star"></i>
-                  </div> -->
+                  </div> 
                 </div>
                 <div class="mt-1 mb-0 text-muted small">
                   <span>100% cotton</span>
@@ -305,7 +312,66 @@
       </div>
     </div>
   </div>
+</section> -->
+
+{% for product in data %}
+  <section>
+  <div class="container" style="margin-top: -30px;">
+    <div class="row justify-content-center mb-3">
+      <div class="col-md-12 col-xl-10">
+        <div class="card shadow-0 border rounded-3">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-12 col-lg-3 col-xl-3 mb-4 mb-lg-0">
+                <div class="bg-image hover-zoom ripple rounded ripple-surface">
+                  <img src="data:image/png;base64,{{ product.image }}" class="card-img-top" alt="{{ product.name }}"></a>
+                  <a href="{{ url_for('prod_details', prodID=product['s_no']) }}">
+                    <div class="hover-overlay">
+                      <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-6 col-xl-6">
+                <h5>{{ product['name'] }}</h5>
+               <div class="d-flex flex-row">
+                  <!-- <div class="text-danger mb-1 me-2">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                  </div>
+                  <span>310</span>  -->
+                </div>
+              
+                <p class="text-truncate mb-4 mb-md-0">
+                  {{product['description']}}...
+                </p>
+              </div>
+              <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
+                <div class="d-flex flex-row align-items-center mb-1">
+                  <h4 class="mb-1 me-1">₹{{product['price']}}</h4>
+                  <!-- <span class="text-danger"><s>$20.99</s></span> -->
+                </div>
+                <!-- <h6 class="text-danger">*Shipping Charges apply*</h6> -->
+                <div class="d-flex flex-column mt-4">
+                  <a href="{{ url_for('prod_details', prodID=product['id']) }}">
+                  <button class="btn btn-primary btn-sm">Details</button></a>
+                  {% if {'s_no': product['id']} in wishlist %}
+                  <a href="{{ url_for('remove_wishlist', product_id=product['id']) }}"><button type="button" class="btn btn-primary px-4">Remove from Wishlist</button></a>
+                {% else %}
+                  <a href="{{ url_for('add_wishlist', product_id=product['id'] )}}"><button type="button" class="btn btn-primary px-4">Add to Wishlist</button></a>
+                {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
 </section>
+{% endfor %}
 
   </body>
   </html>
